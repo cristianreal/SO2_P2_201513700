@@ -21,7 +21,7 @@ var osu = require('node-os-utils')
 var cpu = osu.cpu
 var os = require('os-utils')
 
-function ObtenerTextoArchivo(ruta){
+function getTextFile(ruta){
     let fs = require('fs')
     let archivo = fs.readFileSync(ruta, 'utf-8')
     return archivo;
@@ -38,12 +38,12 @@ Route.on('/').render('arbol')
 Route.on('/arbol').render('arbol')
 
 Route.get("/getTreeView",async ({ view }) => {
-    var contenido = ObtenerTextoArchivo("/proc/201513700_arbol")
+    var contenido = getTextFile("/proc/201513700_arbol")
     return await contenido;
 });
 
 Route.get("/getProcess",async ({ view }) => {
-    var contenido = ObtenerTextoArchivo("/proc/201513700_cpu")
+    var contenido = getTextFile("/proc/201513700_cpu")
     return await contenido;
 });
 
@@ -65,21 +65,21 @@ Route.on('/procesos').render('procesos')
  * RUTAS RAM 
  */
 Route.get("/getTotalRam",async ({ view }) => {
-    var contenido = ObtenerTextoArchivo("/proc/201513700_ram");
+    var contenido = getTextFile("/proc/201513700_ram");
     var arreglo = contenido.split("\n");
     var arreglo1 = arreglo[0].split(":");
     return await  arreglo1[1];
 });
 
 Route.get("/getFreeRam",async ({ view }) => {
-    var contenido = ObtenerTextoArchivo("/proc/201513700_ram")
+    var contenido = getTextFile("/proc/201513700_ram")
     var arreglo = contenido.split("\n");
     var arreglo1 = arreglo[1].split(":");
     return await  arreglo1[1];
 });
 
 Route.get("/getUsedRam",async ({ view }) => {
-    var contenido = ObtenerTextoArchivo("/proc/201513700_ram")
+    var contenido = getTextFile("/proc/201513700_ram")
     var arreglo = contenido.split("\n");
     var arreglo1 = arreglo[2].split(":");
     return await  arreglo1[1];
@@ -87,7 +87,7 @@ Route.get("/getUsedRam",async ({ view }) => {
 
 
 Route.get("/getPercentaje",async ({ view }) => {
-    var contenido = ObtenerTextoArchivo("/proc/201513700_ram")
+    var contenido = getTextFile("/proc/201513700_ram")
     var arreglo = contenido.split("\n");
     var arreglo1 = arreglo[3].split(":");
     return await  arreglo1[1];
