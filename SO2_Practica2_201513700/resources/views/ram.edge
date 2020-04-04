@@ -1,0 +1,136 @@
+@layout('base')
+@section('content')
+<H1> RAM MONITOR </H1>
+<div class="row">
+  
+   <div class="card text-white bg-primary mb-3" style="max-width: 20rem;">
+    <div class="card-header">Total RAM</div>
+    <div class="card-body" id= "labelTotal"> 0 % </div>
+   </div>
+
+   <div class="card text-white bg-primary mb-3" style="max-width: 20rem;">
+     <div class="card-header">Ram Libre</div>
+     <div class="card-body" id= "labelConsumo"> 0 % </div>
+   </div>
+   
+   <div class="card text-white bg-primary mb-3" style="max-width: 20rem;">
+     <div class="card-header">Ram Consumida</div>
+     <div class="card-body" id= "labelLibre"> 0 % </div>
+   </div>
+   
+   <div class="card text-white bg-primary mb-3" style="max-width: 20rem;">
+     <div class="card-header">% Uso de RAM</div>
+     <div class="card-body" id= "labeluso"> 0 % </div>
+   </div>
+</div>
+
+<div id="chart_div" style="width: 1200px; height: 500px"></div>
+
+<script>
+    google.charts.load('current', {packages: ['corechart', 'line']});
+    google.charts.setOnLoadCallback(drawBackgroundColor);
+    var chartLoaded = false;
+    var RamHistogram = [];
+    var PorcentajeUso = 0;
+    function drawBackgroundColor() {
+          var data = new google.visualization.DataTable();
+          data.addColumn('number', 'X');
+          data.addColumn('number', 'Ram');
+          data.addRows(RamHistogram);
+          var options = {
+            hAxis: { title: 'Segundos' },
+            vAxis: {
+              title: 'Ram Load %',
+              viewWindow:{ min:0, max:100 }
+            },
+            backgroundColor: '#f1f8f9',
+            colors: ['#a52714', '#097138'],
+          crosshair: {
+            color: '#000',
+            trigger: 'selection'
+          },
+          explorer: {
+            actions: ['dragToZoom', 'rightClickToReset'],
+            axis: 'horizontal',
+            keepInBounds: false,
+            maxZoomIn: 28.0
+          }
+          };
+          
+    
+          var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+          chart.draw(data, options);
+          charLoaded = true;
+        }
+
+        var histogramLength = 61;
+        function Update_Draw( ){
+            if(RamHistogram.length< histogramLength){
+                for(var i=0;i<histogramLength;i++){
+                    RamHistogram[i]=[i,0];
+                }
+            }
+            if(RamHistogram.length >= histogramLength){
+                RamHistogram.shift();
+            }
+            RamHistogram.push([0,Math.round(PorcentajeUso)]);
+            for(var i=0;i<histogramLength;i++){
+                RamHistogram[i][0]= i;
+            }
+        }
+
+        function getTotalRam(){
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET","/getTotalRam", true);
+                xhttp.onreadystatechange = function(){
+                        if(this.readyState == 4){
+                        document.getElementById("labelTotal").innerHTML = "<H1> "+this.responseText +" MB</H1>";
+                }
+                }
+                xhttp.send();
+        }
+        function getFreeRam(){
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET","/getFreeRam", true);
+                xhttp.onreadystatechange = function(){
+                        if(this.readyState == 4){
+                        document.getElementById("labelLibre").innerHTML = "<H1> "+this.responseText +" MB</H1>";
+                }
+                }
+                xhttp.send();
+        }
+        function getUsedRam(){
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET","/getUsedRam", true);
+            xhttp.onreadystatechange = function(){
+                if(this.readyState == 4){
+                document.getElementById("labelConsumo").innerHTML = "<H1> "+this.responseText +" MB</H1>";
+              }
+            }
+            xhttp.send();
+        }
+        function getPercentaje(){
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET","/getPercentaje", true);
+            xhttp.onreadystatechange = function(){
+                if(this.readyState == 4){
+                document.getElementById("labeluso").innerHTML = "<H1> "+this.responseText +" %</H1>";
+                        PorcentajeUso = parseFloat(this.responseText)
+        }
+            }
+            xhttp.send();
+}
+function obtenerRam(){
+        getTotalRam();
+        getUsedRam();
+        getFreeRam();
+        getPercentaje();
+        Update_Draw();
+                if(charLoaded)
+                      drawBackgroundColor();
+}
+
+setInterval(function() { obtenerRam(); }, 100);
+</script>
+
+@endsection

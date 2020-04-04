@@ -1,0 +1,84 @@
+@layout('base')
+@section('content')
+
+<H1> CPU MONITOR </H1>
+<div class="row">
+        <div class="card text-white bg-primary mb-3" style="max-width: 20rem;">
+                <div class="card-header">% Uso de CPU</div>
+                <div class="card-body" id= "labeluso">
+                0 %  
+                </div>
+        </div>
+</div>
+        <div id="chart_div" style="width: 1200px; height: 500px"></div>
+
+<script>
+    google.charts.load('current', {packages: ['corechart', 'line']});
+    google.charts.setOnLoadCallback(drawBackgroundColor);
+    var chartLoaded = false;
+    var RamHistogram = [];
+    var PorcentajeUso = 0;
+    function drawBackgroundColor() {
+          var data = new google.visualization.DataTable();
+          data.addColumn('number', 'X');
+          data.addColumn('number', 'CPU');
+          data.addRows(RamHistogram);    
+          var options = {
+            hAxis: { title: 'Segundos'},
+            vAxis: { title: 'CPU Load %', viewWindow:{ min:0, max:100 } },
+            backgroundColor: '#f1f8f9',
+            colors: ['#a52714', '#097138'],
+          crosshair: {
+            color: '#000',
+            trigger: 'selection'
+          },
+          explorer: {
+            actions: ['dragToZoom', 'rightClickToReset'],
+            axis: 'horizontal',
+            keepInBounds: false,
+            maxZoomIn: 28.0
+          }
+          };
+          var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+          chart.draw(data, options);
+          charLoaded = true;
+        }
+
+        var histogramLength = 61;
+        function update_draw( ){
+            if(RamHistogram.length< histogramLength){
+                for(var i=0;i<histogramLength;i++){
+                    RamHistogram[i]=[i,0];
+                }
+            }
+            if(RamHistogram.length >= histogramLength){
+                RamHistogram.shift();
+            }
+            RamHistogram.push([0,Math.round(PorcentajeUso)]);
+            for(var i=0;i<histogramLength;i++){
+                RamHistogram[i][0]= i;
+            }
+        }
+
+        function get_consumePercentegeCPU(){
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET","/getCPU", true);
+            xhttp.onreadystatechange = function(){
+                if(this.readyState == 4){
+                document.getElementById("labeluso").innerHTML = "<H1> "+this.responseText +" %</H1>";
+                PorcentajeUso = parseFloat(this.responseText)
+        }
+            }
+            xhttp.send();
+}
+
+function consumeCPU(){
+        get_consumePercentegeCPU();
+        update_draw();
+                if(charLoaded)
+                      drawBackgroundColor();
+}
+setInterval(function() { consumeCPU(); }, 100);
+</script>
+
+@endsection
