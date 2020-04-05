@@ -30,7 +30,8 @@ function getTextFile(ruta){
 /**
  * RUTA INICIO
  */
-Route.on('/').render('arbol')
+//Route.on('/').render('arbol')
+Route.on('/').render('welcome')
 
 /**
  * RUTAS ARBOL

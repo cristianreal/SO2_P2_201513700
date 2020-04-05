@@ -1,24 +1,25 @@
 @layout('base')
 @section('content')
-<H1> Arbol de procesos </H1>
 <p id="arbol"> </p>
 <script>
-  /**
-  * getTreeView
-  */
-
-  function getTreeView(){
-    var xhttp = new XMLHttpRequest();
-    xhttp.open("GET","/getTreeView", true);
-    xhttp.onreadystatechange = function(){
-      if(this.readyState == 4){
-        var texto =this.responseText;
-        document.getElementById("arbol").innerHTML = texto;
-      }
+function getTreeView(){
+  var xhttp = new XMLHttpRequest();
+  xhttp.open("GET","/getTreeView", true);
+  xhttp.onreadystatechange = function(){
+    if(this.readyState == 4){
+      var texto = this.responseText;
+      document.getElementById("arbol").innerHTML = texto;
     }
-    xhttp.send();
   }
-  //------------------------------------------
-  getTreeView();
+  xhttp.send();
+}
+function load_js(){
+  var head= document.getElementsByTagName('head')[0];
+  var script= document.createElement('script');
+  script.src= 'javascripts/ap.js';
+  head.appendChild(script);
+}
+getTreeView();
+load_js();
 </script>
 @endsection
